@@ -164,9 +164,141 @@
     background: linear-gradient(90deg, #ffd75e, #ff8a3d);
     transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.4s;
   }
+
+  /* ── 설정 버튼 & 패널 ─────────────────── */
+  .btn-settings {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    z-index: 20;
+    width: 52px;
+    height: 52px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(30, 80, 130, 0.18);
+    transition: transform 0.25s ease;
+  }
+
+  .btn-settings:hover { transform: rotate(45deg) scale(1.08); }
+
+  .settings-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(20, 50, 80, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .settings-overlay.show { display: flex; }
+
+  .settings-panel {
+    background: #fff;
+    border-radius: 28px;
+    padding: 34px 36px 28px;
+    width: min(92vw, 400px);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .settings-panel h2 {
+    font-family: 'Jua', sans-serif;
+    font-size: 24px;
+    color: #1d6fa5;
+    margin-bottom: 20px;
+  }
+
+  .settings-panel label {
+    display: block;
+    font-size: 15px;
+    color: #35586e;
+    margin-bottom: 8px;
+  }
+
+  .settings-panel input[type="date"] {
+    width: 100%;
+    font-family: inherit;
+    font-size: 20px;
+    padding: 12px 14px;
+    border: 2px solid #cfe3f0;
+    border-radius: 14px;
+    color: #1d3d52;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .settings-panel input[type="date"]:focus { border-color: #3d8fc4; }
+
+  .settings-hint {
+    font-size: 13px;
+    color: rgba(53, 88, 110, 0.6);
+    margin-top: 8px;
+  }
+
+  .settings-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .settings-actions button {
+    font-family: 'Jua', sans-serif;
+    border: none;
+    border-radius: 14px;
+    padding: 13px 0;
+    font-size: 17px;
+    cursor: pointer;
+    transition: transform 0.08s ease, filter 0.15s ease;
+  }
+
+  .settings-actions button:active { transform: scale(0.96); }
+
+  .btn-save {
+    flex: 2;
+    background: linear-gradient(160deg, #ff8a3d, #ff5e62);
+    color: #fff;
+    box-shadow: 0 5px 18px rgba(255, 94, 98, 0.35);
+  }
+
+  .btn-default {
+    flex: 1.4;
+    background: #eaf3fa;
+    color: #1d6fa5;
+  }
+
+  .btn-close {
+    flex: 1;
+    background: transparent;
+    color: rgba(53, 88, 110, 0.6);
+  }
 </style>
 </head>
 <body>
+
+  <button class="btn-settings" id="btnSettings" title="방학 날짜 설정" aria-label="방학 날짜 설정">⚙️</button>
+
+  <div class="settings-overlay" id="settingsOverlay">
+    <div class="settings-panel">
+      <h2>📅 방학 날짜 설정</h2>
+      <label for="dateInput">여름방학 시작일 (방학식 날짜)</label>
+      <input type="date" id="dateInput">
+      <p class="settings-hint">전날이 D-1로 계산돼요. 저장하면 이 화면(브라우저)에 계속 기억됩니다.</p>
+      <div class="settings-actions">
+        <button class="btn-save" id="btnSave">저장</button>
+        <button class="btn-default" id="btnDefault">기본값으로</button>
+        <button class="btn-close" id="btnClose">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <div class="sun"></div>
   <div class="cloud c1"></div>
@@ -194,8 +326,21 @@
 (() => {
   'use strict';
 
-  // 여름방학 시작일: 2026년 7월 23일 (전날인 7/22가 D-1)
-  const VACATION = { year: 2026, month: 7, day: 23 };
+  // 여름방학 시작일 기본값: 2026년 7월 23일 (전날인 7/22가 D-1)
+  const DEFAULT_DATE = '2026-07-23';
+  const SETTINGS_KEY = 'dday-settings-v1';
+
+  let vacationDate = DEFAULT_DATE; // 'YYYY-MM-DD'
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if (saved && /^\d{4}-\d{2}-\d{2}$/.test(saved.date)) vacationDate = saved.date;
+  } catch (e) { /* 저장값이 없거나 손상됨 → 기본값 사용 */ }
+
+  function vacationParts() {
+    const [y, m, d] = vacationDate.split('-').map(Number);
+    return { year: y, month: m, day: d };
+  }
 
   const elDday = document.getElementById('dday');
   const elSub = document.getElementById('sub');
@@ -210,7 +355,8 @@
   }
 
   function daysLeft(now) {
-    const target = new Date(VACATION.year, VACATION.month - 1, VACATION.day);
+    const v = vacationParts();
+    const target = new Date(v.year, v.month - 1, v.day);
     return Math.round((target - startOfDay(now)) / 86400000);
   }
 
@@ -246,8 +392,10 @@
       elDday.classList.remove('small');
       elSub.innerHTML = '';
       elSub.append('방학식은 ');
+      const v = vacationParts();
       const b = document.createElement('b');
-      b.textContent = VACATION.month + '월 ' + VACATION.day + '일';
+      b.textContent = (v.year !== now.getFullYear() ? v.year + '년 ' : '')
+        + v.month + '월 ' + v.day + '일';
       elSub.appendChild(b);
       elSub.append(d === 1 ? ' — 바로 내일이에요! 🎒' : ' — 조금만 더 힘내요! 💪');
       elProgress.style.display = '';
@@ -267,6 +415,49 @@
       elProgress.style.display = 'none';
     }
   }
+
+  // ── 설정 패널 ─────────────────────────────
+  const overlay = document.getElementById('settingsOverlay');
+  const dateInput = document.getElementById('dateInput');
+
+  function applyDate(newDate) {
+    vacationDate = newDate;
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ date: vacationDate }));
+      // 날짜가 바뀌면 진행 바 기준일도 오늘부터 다시 계산
+      localStorage.removeItem(START_KEY);
+    } catch (e) { /* 시크릿 모드 등 저장 불가 → 이번 접속에만 적용 */ }
+    elFill.style.width = '0';
+    render();
+  }
+
+  document.getElementById('btnSettings').addEventListener('click', () => {
+    dateInput.value = vacationDate;
+    overlay.classList.add('show');
+  });
+
+  document.getElementById('btnSave').addEventListener('click', () => {
+    if (!dateInput.value) { dateInput.focus(); return; }
+    applyDate(dateInput.value);
+    overlay.classList.remove('show');
+  });
+
+  document.getElementById('btnDefault').addEventListener('click', () => {
+    dateInput.value = DEFAULT_DATE;
+  });
+
+  document.getElementById('btnClose').addEventListener('click', () => {
+    overlay.classList.remove('show');
+  });
+
+  // 패널 바깥(어두운 영역)을 누르면 닫힘
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') overlay.classList.remove('show');
+  });
 
   render();
 
