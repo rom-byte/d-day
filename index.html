@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여름방학 D-Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Gowun Dodum', 'Malgun Gothic', '맑은 고딕', sans-serif;
+    background: linear-gradient(180deg, #7ec3f0 0%, #a8dcf5 45%, #ffe9b8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+    position: relative;
+  }
+
+  /* ── 해 ─────────────────────────────── */
+  .sun {
+    position: absolute;
+    top: 7vh;
+    right: 9vw;
+    width: clamp(70px, 11vw, 150px);
+    height: clamp(70px, 11vw, 150px);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffe98a, #ffc93c);
+    box-shadow: 0 0 70px 25px rgba(255, 213, 79, 0.55);
+    animation: glow 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from { box-shadow: 0 0 60px 20px rgba(255, 213, 79, 0.45); }
+    to   { box-shadow: 0 0 90px 35px rgba(255, 213, 79, 0.7); }
+  }
+
+  /* ── 구름 ────────────────────────────── */
+  .cloud {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 999px;
+    filter: blur(1px);
+    animation: drift linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+  }
+  .cloud::before { width: 55%; height: 160%; left: 14%; bottom: 25%; }
+  .cloud::after  { width: 40%; height: 120%; right: 16%; bottom: 30%; }
+
+  .cloud.c1 { width: 180px; height: 52px; top: 14vh; left: -200px; animation-duration: 65s; }
+  .cloud.c2 { width: 120px; height: 36px; top: 30vh; left: -140px; animation-duration: 48s; animation-delay: -22s; opacity: 0.8; }
+  .cloud.c3 { width: 240px; height: 64px; top: 6vh;  left: -260px; animation-duration: 85s; animation-delay: -50s; opacity: 0.7; }
+
+  @keyframes drift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(calc(100vw + 300px)); }
+  }
+
+  /* ── 파도 ────────────────────────────── */
+  .waves {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 18vh;
+    min-height: 90px;
+    pointer-events: none;
+  }
+  .waves svg { position: absolute; bottom: 0; width: 200%; height: 100%; animation: wave 14s linear infinite; }
+  .waves svg.back { opacity: 0.5; animation-duration: 20s; animation-direction: reverse; height: 115%; }
+
+  @keyframes wave {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ── 카드 ────────────────────────────── */
+  .card {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 36px;
+    padding: clamp(28px, 6vh, 60px) clamp(36px, 9vw, 110px);
+    box-shadow: 0 24px 70px rgba(30, 80, 130, 0.22);
+    animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(36px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .label {
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(20px, 3.4vw, 38px);
+    color: #1d6fa5;
+    letter-spacing: 3px;
+  }
+
+  .label .emoji { letter-spacing: 0; }
+
+  .dday {
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(96px, 24vw, 300px);
+    line-height: 1.08;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(160deg, #ff8a3d 10%, #ff5e62 55%, #e0447a 95%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 8px 22px rgba(255, 94, 98, 0.35));
+    animation: pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s backwards;
+  }
+
+  .dday.small { font-size: clamp(48px, 11vw, 130px); line-height: 1.25; }
+
+  @keyframes pop {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .sub {
+    margin-top: clamp(10px, 2vh, 20px);
+    font-size: clamp(15px, 2.2vw, 24px);
+    color: #35586e;
+  }
+
+  .sub b { color: #1d6fa5; font-variant-numeric: tabular-nums; }
+
+  .today {
+    margin-top: 6px;
+    font-size: clamp(13px, 1.8vw, 19px);
+    color: rgba(53, 88, 110, 0.65);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── 진행 바 (오늘 → 방학) ─────────────── */
+  .progress {
+    margin: clamp(16px, 3vh, 28px) auto 0;
+    width: min(70vw, 420px);
+    height: 12px;
+    background: rgba(29, 111, 165, 0.15);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress .fill {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ffd75e, #ff8a3d);
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.4s;
+  }
+</style>
+</head>
+<body>
+
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+
+  <main class="card">
+    <div class="label"><span class="emoji">🏖️</span> 여름방학까지</div>
+    <div class="dday" id="dday">D-?</div>
+    <div class="sub" id="sub"></div>
+    <div class="today" id="today"></div>
+    <div class="progress" id="progress"><div class="fill" id="fill"></div></div>
+  </main>
+
+  <div class="waves">
+    <svg class="back" viewBox="0 0 1200 100" preserveAspectRatio="none">
+      <path d="M0,45 C150,90 300,0 450,45 C600,90 750,0 900,45 C1050,90 1200,0 1200,45 L1200,100 L0,100 Z" fill="#5aa9d6"/>
+    </svg>
+    <svg viewBox="0 0 1200 100" preserveAspectRatio="none">
+      <path d="M0,55 C150,15 300,95 450,55 C600,15 750,95 900,55 C1050,15 1200,95 1200,55 L1200,100 L0,100 Z" fill="#3d8fc4"/>
+    </svg>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+
+  // 여름방학 시작일: 2026년 7월 23일 (전날인 7/22가 D-1)
+  const VACATION = { year: 2026, month: 7, day: 23 };
+
+  const elDday = document.getElementById('dday');
+  const elSub = document.getElementById('sub');
+  const elToday = document.getElementById('today');
+  const elFill = document.getElementById('fill');
+  const elProgress = document.getElementById('progress');
+
+  const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+  function startOfDay(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  function daysLeft(now) {
+    const target = new Date(VACATION.year, VACATION.month - 1, VACATION.day);
+    return Math.round((target - startOfDay(now)) / 86400000);
+  }
+
+  // 진행 바 기준일: 페이지를 처음 연 날을 기억해 두고,
+  // 그날부터 방학까지의 비율을 채운다.
+  const START_KEY = 'dday-first-visit';
+  function progressRatio(now) {
+    let first;
+    try {
+      first = localStorage.getItem(START_KEY);
+      if (!first) {
+        first = startOfDay(now).getTime();
+        localStorage.setItem(START_KEY, first);
+      }
+    } catch (e) {
+      first = startOfDay(now).getTime();
+    }
+    const total = daysLeft(new Date(Number(first)));
+    if (total <= 0) return 1;
+    return Math.min(1, Math.max(0, (total - daysLeft(now)) / total));
+  }
+
+  function render() {
+    const now = new Date();
+    const d = daysLeft(now);
+
+    elToday.textContent = '오늘은 ' + now.getFullYear() + '년 '
+      + (now.getMonth() + 1) + '월 ' + now.getDate() + '일 ('
+      + WEEKDAYS[now.getDay()] + ')';
+
+    if (d > 0) {
+      elDday.textContent = 'D-' + d;
+      elDday.classList.remove('small');
+      elSub.innerHTML = '';
+      elSub.append('방학식은 ');
+      const b = document.createElement('b');
+      b.textContent = VACATION.month + '월 ' + VACATION.day + '일';
+      elSub.appendChild(b);
+      elSub.append(d === 1 ? ' — 바로 내일이에요! 🎒' : ' — 조금만 더 힘내요! 💪');
+      elProgress.style.display = '';
+      // 렌더 직후 트랜지션이 먹도록 다음 프레임에 채운다
+      requestAnimationFrame(() => {
+        elFill.style.width = (progressRatio(now) * 100).toFixed(1) + '%';
+      });
+    } else if (d === 0) {
+      elDday.textContent = 'D-DAY 🎉';
+      elDday.classList.add('small');
+      elSub.textContent = '오늘부터 여름방학! 신나게 놀아요! 🍉';
+      elProgress.style.display = 'none';
+    } else {
+      elDday.textContent = '방학 중 ⛱️';
+      elDday.classList.add('small');
+      elSub.textContent = '여름방학이 시작된 지 ' + (-d) + '일째예요!';
+      elProgress.style.display = 'none';
+    }
+  }
+
+  render();
+
+  // 자정이 지나면 자동으로 갱신 (1분마다 날짜 변화 확인)
+  let lastDate = new Date().getDate();
+  setInterval(() => {
+    const now = new Date();
+    if (now.getDate() !== lastDate) {
+      lastDate = now.getDate();
+      render();
+    }
+  }, 60000);
+})();
+</script>
+</body>
+</html>
